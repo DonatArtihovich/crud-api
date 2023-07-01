@@ -24,7 +24,7 @@ const server = node_http_1.default.createServer((request, response) => __awaiter
         response.writeHead(200, { "Content-Type": "application/json" });
         response.end(JSON.stringify(users));
     }
-    if (((_a = request.url) === null || _a === void 0 ? void 0 : _a.match(/^\/api\/users\/[^/]+$/)) && request.method === 'GET') {
+    else if (((_a = request.url) === null || _a === void 0 ? void 0 : _a.match(/^\/api\/users\/[^/]+$/)) && request.method === 'GET') {
         const id = request.url.split('/')[3];
         const UUIDPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[8-9a-b][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (!UUIDPattern.test(id)) {
@@ -38,12 +38,20 @@ const server = node_http_1.default.createServer((request, response) => __awaiter
                 response.end(JSON.stringify(user));
             }
             catch (err) {
-                response.writeHead(404, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify({ message: 'User not found' }));
+                if (err instanceof Error) {
+                    if (err.message === 'Not Founded') {
+                        response.writeHead(404, { 'Content-Type': 'application/json' });
+                        response.end(JSON.stringify({ message: 'User not found' }));
+                    }
+                    else {
+                        response.writeHead(500, { 'Content-Type': 'application/json' });
+                        response.end(JSON.stringify({ message: 'Unexpected server error' }));
+                    }
+                }
             }
         }
     }
-    if (request.url === '/api/users' && request.method === 'POST') {
+    else if (request.url === '/api/users' && request.method === 'POST') {
         try {
             const data = yield getRequestData(request);
             if (JSON.parse(data)['username'] === undefined
@@ -58,11 +66,19 @@ const server = node_http_1.default.createServer((request, response) => __awaiter
             response.end(JSON.stringify(user));
         }
         catch (err) {
-            response.writeHead(400, { 'Content-Type': 'application/json' });
-            response.end(JSON.stringify({ message: err }));
+            if (err instanceof Error) {
+                if (err.message === 'Not Founded') {
+                    response.writeHead(404, { 'Content-Type': 'application/json' });
+                    response.end(JSON.stringify({ message: 'User not found' }));
+                }
+                else {
+                    response.writeHead(500, { 'Content-Type': 'application/json' });
+                    response.end(JSON.stringify({ message: 'Unexpected server error' }));
+                }
+            }
         }
     }
-    if (((_b = request.url) === null || _b === void 0 ? void 0 : _b.match(/^\/api\/users\/[^/]+$/)) && request.method === 'PUT') {
+    else if (((_b = request.url) === null || _b === void 0 ? void 0 : _b.match(/^\/api\/users\/[^/]+$/)) && request.method === 'PUT') {
         const id = request.url.split('/')[3];
         const UUIDPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[8-9a-b][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (!UUIDPattern.test(id)) {
@@ -77,12 +93,20 @@ const server = node_http_1.default.createServer((request, response) => __awaiter
                 response.end(JSON.stringify(user));
             }
             catch (err) {
-                response.writeHead(404, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify({ message: 'User not found' }));
+                if (err instanceof Error) {
+                    if (err.message === 'Not Founded') {
+                        response.writeHead(404, { 'Content-Type': 'application/json' });
+                        response.end(JSON.stringify({ message: 'User not found' }));
+                    }
+                    else {
+                        response.writeHead(500, { 'Content-Type': 'application/json' });
+                        response.end(JSON.stringify({ message: 'Unexpected server error' }));
+                    }
+                }
             }
         }
     }
-    if (((_c = request.url) === null || _c === void 0 ? void 0 : _c.match(/^\/api\/users\/[^/]+$/)) && request.method === 'DELETE') {
+    else if (((_c = request.url) === null || _c === void 0 ? void 0 : _c.match(/^\/api\/users\/[^/]+$/)) && request.method === 'DELETE') {
         const id = request.url.split('/')[3];
         const UUIDPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[8-9a-b][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (!UUIDPattern.test(id)) {
@@ -96,14 +120,24 @@ const server = node_http_1.default.createServer((request, response) => __awaiter
                 response.end();
             }
             catch (err) {
-                console.log(err);
-                response.writeHead(404, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify({ message: 'User not found' }));
+                if (err instanceof Error) {
+                    if (err.message === 'Not Founded') {
+                        response.writeHead(404, { 'Content-Type': 'application/json' });
+                        response.end(JSON.stringify({ message: 'User not found' }));
+                    }
+                    else {
+                        response.writeHead(500, { 'Content-Type': 'application/json' });
+                        response.end(JSON.stringify({ message: 'Unexpected server error' }));
+                    }
+                }
             }
         }
     }
+    else {
+        response.writeHead(404, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify({ message: 'Resource not found' }));
+    }
 }));
-//144ea26f-a8be-4d8c-a9f6-d8a8493f5dc0
 server.listen(PORT, () => {
     console.log(`Server is started on port ${PORT}`);
 });

@@ -10,8 +10,7 @@ const server = http.createServer(async (request, response) => {
         const users = await controller.getUsers()
         response.writeHead(200, { "Content-Type": "application/json" })
         response.end(JSON.stringify(users))
-    }
-    if (request.url?.match(/^\/api\/users\/[^/]+$/) && request.method === 'GET') {
+    } else if (request.url?.match(/^\/api\/users\/[^/]+$/) && request.method === 'GET') {
         const id = request.url.split('/')[3]
         const UUIDPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[8-9a-b][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (!UUIDPattern.test(id)) {
@@ -23,13 +22,18 @@ const server = http.createServer(async (request, response) => {
                 response.writeHead(200, { 'Content-Type': 'application/json' })
                 response.end(JSON.stringify(user))
             } catch (err) {
-                response.writeHead(404, { 'Content-Type': 'application/json' })
-                response.end(JSON.stringify({ message: 'User not found' }))
+                if (err instanceof Error) {
+                    if (err.message === 'Not Founded') {
+                        response.writeHead(404, { 'Content-Type': 'application/json' })
+                        response.end(JSON.stringify({ message: 'User not found' }))
+                    } else {
+                        response.writeHead(500, { 'Content-Type': 'application/json' })
+                        response.end(JSON.stringify({ message: 'Unexpected server error' }))
+                    }
+                }
             }
         }
-    }
-
-    if (request.url === '/api/users' && request.method === 'POST') {
+    } else if (request.url === '/api/users' && request.method === 'POST') {
         try {
             const data: string = await getRequestData(request) as string
             if (JSON.parse(data)['username'] === undefined
@@ -43,11 +47,17 @@ const server = http.createServer(async (request, response) => {
             response.writeHead(201, { 'Content-Type': 'application/json' })
             response.end(JSON.stringify(user))
         } catch (err) {
-            response.writeHead(400, { 'Content-Type': 'application/json' })
-            response.end(JSON.stringify({ message: err }))
+            if (err instanceof Error) {
+                if (err.message === 'Not Founded') {
+                    response.writeHead(404, { 'Content-Type': 'application/json' })
+                    response.end(JSON.stringify({ message: 'User not found' }))
+                } else {
+                    response.writeHead(500, { 'Content-Type': 'application/json' })
+                    response.end(JSON.stringify({ message: 'Unexpected server error' }))
+                }
+            }
         }
-    }
-    if (request.url?.match(/^\/api\/users\/[^/]+$/) && request.method === 'PUT') {
+    } else if (request.url?.match(/^\/api\/users\/[^/]+$/) && request.method === 'PUT') {
         const id = request.url.split('/')[3]
         const UUIDPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[8-9a-b][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (!UUIDPattern.test(id)) {
@@ -60,12 +70,18 @@ const server = http.createServer(async (request, response) => {
                 response.writeHead(200, { 'Content-Type': 'application/json' })
                 response.end(JSON.stringify(user))
             } catch (err) {
-                response.writeHead(404, { 'Content-Type': 'application/json' })
-                response.end(JSON.stringify({ message: 'User not found' }))
+                if (err instanceof Error) {
+                    if (err.message === 'Not Founded') {
+                        response.writeHead(404, { 'Content-Type': 'application/json' })
+                        response.end(JSON.stringify({ message: 'User not found' }))
+                    } else {
+                        response.writeHead(500, { 'Content-Type': 'application/json' })
+                        response.end(JSON.stringify({ message: 'Unexpected server error' }))
+                    }
+                }
             }
         }
-    }
-    if (request.url?.match(/^\/api\/users\/[^/]+$/) && request.method === 'DELETE') {
+    } else if (request.url?.match(/^\/api\/users\/[^/]+$/) && request.method === 'DELETE') {
         const id = request.url.split('/')[3]
         const UUIDPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[8-9a-b][0-9a-f]{3}-[0-9a-f]{12}$/i;
         if (!UUIDPattern.test(id)) {
@@ -77,14 +93,23 @@ const server = http.createServer(async (request, response) => {
                 response.writeHead(204, { 'Content-Type': 'application/json' })
                 response.end()
             } catch (err) {
-                console.log(err)
-                response.writeHead(404, { 'Content-Type': 'application/json' })
-                response.end(JSON.stringify({ message: 'User not found' }))
+                if (err instanceof Error) {
+                    if (err.message === 'Not Founded') {
+                        response.writeHead(404, { 'Content-Type': 'application/json' })
+                        response.end(JSON.stringify({ message: 'User not found' }))
+                    } else {
+                        response.writeHead(500, { 'Content-Type': 'application/json' })
+                        response.end(JSON.stringify({ message: 'Unexpected server error' }))
+                    }
+                }
             }
         }
+    } else {
+        response.writeHead(404, { 'Content-Type': 'application/json' })
+        response.end(JSON.stringify({ message: 'Resource not found' }))
     }
 })
-//144ea26f-a8be-4d8c-a9f6-d8a8493f5dc0
+
 server.listen(PORT, () => {
     console.log(`Server is started on port ${PORT}`)
 })

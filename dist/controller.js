@@ -16,8 +16,11 @@ class Controller {
     constructor() { }
     getUsers() {
         return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, _) => {
-                resolve(data_1.Users);
+            return new Promise((resolve, reject) => {
+                if (data_1.Users)
+                    resolve(data_1.Users);
+                else
+                    reject(new Error('Not Founded'));
             });
         });
     }
@@ -28,7 +31,7 @@ class Controller {
                     throw new Error('');
                 const user = data_1.Users.find((user) => user.id === id);
                 if (user === undefined)
-                    reject();
+                    reject(new Error('Not Founded'));
                 else
                     resolve(user);
             });
@@ -39,7 +42,6 @@ class Controller {
             return new Promise(resolve => {
                 const user = JSON.parse(data);
                 const id = (0, uuid_1.v4)();
-                console.log(id);
                 const userData = Object.assign({ id }, user);
                 data_1.Users.push(userData);
                 resolve(userData);
@@ -51,7 +53,7 @@ class Controller {
             return new Promise((resolve, reject) => {
                 const userIndex = data_1.Users.findIndex(user => user.id === id);
                 if (userIndex === -1) {
-                    reject();
+                    reject(new Error('Not Founded'));
                 }
                 else {
                     const requestData = JSON.parse(data);
@@ -75,7 +77,7 @@ class Controller {
             return new Promise((resolve, reject) => {
                 const userIndex = data_1.Users.findIndex(user => user.id === id);
                 if (userIndex === -1)
-                    reject(new Error('User not found'));
+                    reject(new Error('Not Founded'));
                 else {
                     data_1.Users.splice(userIndex);
                     resolve(data_1.Users);
