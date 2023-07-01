@@ -51,4 +51,15 @@ export class Controller implements IController {
             }
         })
     }
+
+    async deleteUser(id: string): Promise<Data> {
+        return new Promise((resolve, reject) => {
+            const userIndex: number = Users.findIndex(user => user.id === id)
+            if (userIndex === -1) reject()
+            else {
+                Users.splice(userIndex)
+                resolve(Users)
+            }
+        })
+    }
 }

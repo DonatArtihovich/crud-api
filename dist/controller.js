@@ -70,5 +70,18 @@ class Controller {
             });
         });
     }
+    deleteUser(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                const userIndex = data_1.Users.findIndex(user => user.id === id);
+                if (userIndex === -1)
+                    reject(new Error('User not found'));
+                else {
+                    data_1.Users.splice(userIndex);
+                    resolve(data_1.Users);
+                }
+            });
+        });
+    }
 }
 exports.Controller = Controller;

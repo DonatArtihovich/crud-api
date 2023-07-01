@@ -17,7 +17,7 @@ require("dotenv/config");
 const controller_1 = require("./controller");
 const PORT = process.env.PORT;
 const server = node_http_1.default.createServer((request, response) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a, _b, _c;
     const controller = new controller_1.Controller;
     if (request.url === '/api/users' && request.method === 'GET') {
         const users = yield controller.getUsers();
@@ -73,9 +73,27 @@ const server = node_http_1.default.createServer((request, response) => __awaiter
             try {
                 const data = yield getRequestData(request);
                 const user = yield controller.updateUser(id, data);
-                console.log(user);
                 response.writeHead(200, { 'Content-Type': 'application/json' });
                 response.end(JSON.stringify(user));
+            }
+            catch (err) {
+                response.writeHead(404, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify({ message: 'User not found' }));
+            }
+        }
+    }
+    if (((_c = request.url) === null || _c === void 0 ? void 0 : _c.match(/^\/api\/users\/[^/]+$/)) && request.method === 'DELETE') {
+        const id = request.url.split('/')[3];
+        const UUIDPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[8-9a-b][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (!UUIDPattern.test(id)) {
+            response.writeHead(400, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ message: 'User id is invalid' }));
+        }
+        else {
+            try {
+                yield controller.deleteUser(id);
+                response.writeHead(204, { 'Content-Type': 'application/json' });
+                response.end();
             }
             catch (err) {
                 console.log(err);

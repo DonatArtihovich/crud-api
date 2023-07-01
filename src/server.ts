@@ -57,9 +57,25 @@ const server = http.createServer(async (request, response) => {
             try {
                 const data: string = await getRequestData(request) as string
                 const user = await controller.updateUser(id, data);
-                console.log(user)
                 response.writeHead(200, { 'Content-Type': 'application/json' })
                 response.end(JSON.stringify(user))
+            } catch (err) {
+                response.writeHead(404, { 'Content-Type': 'application/json' })
+                response.end(JSON.stringify({ message: 'User not found' }))
+            }
+        }
+    }
+    if (request.url?.match(/^\/api\/users\/[^/]+$/) && request.method === 'DELETE') {
+        const id = request.url.split('/')[3]
+        const UUIDPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[8-9a-b][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (!UUIDPattern.test(id)) {
+            response.writeHead(400, { 'Content-Type': 'application/json' })
+            response.end(JSON.stringify({ message: 'User id is invalid' }))
+        } else {
+            try {
+                await controller.deleteUser(id)
+                response.writeHead(204, { 'Content-Type': 'application/json' })
+                response.end()
             } catch (err) {
                 console.log(err)
                 response.writeHead(404, { 'Content-Type': 'application/json' })
