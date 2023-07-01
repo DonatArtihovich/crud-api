@@ -24,20 +24,25 @@ const server = http.createServer(async (request, response) => {
                 response.end(JSON.stringify(user))
             } catch (err) {
                 response.writeHead(404, { 'Content-Type': 'application/json' })
-                response.end(JSON.stringify({ message: err }))
+                response.end(JSON.stringify({ message: 'User not found' }))
             }
         }
     }
 
     if (request.url === '/api/users') {
-        console.log(request.method)
-
         try {
             const data: string = await getRequestData(request) as string
+            if (JSON.parse(data)['username'] === undefined
+                || JSON.parse(data)['age'] === undefined
+                || JSON.parse(data)['hobbies'] === undefined
+                || JSON.parse(data)['id'] !== undefined) {
+                response.writeHead(400, { 'Content-Type': 'application/json' })
+                response.end(JSON.stringify({ message: 'Invalid user object' }))
+            }
             console.log(data)
             const user = await controller.addUser(data)
             console.log(user)
-            response.writeHead(200, { 'Content-Type': 'application/json' })
+            response.writeHead(201, { 'Content-Type': 'application/json' })
             response.end(JSON.stringify(user))
         } catch (err) {
             response.writeHead(400, { 'Content-Type': 'application/json' })
@@ -56,7 +61,6 @@ async function getRequestData(req: http.IncomingMessage) {
         let reqBody = ''
         req.on('data', data => {
             reqBody += data
-            // resolve(reqBody)
         })
 
         req.on('end', () => resolve(reqBody))

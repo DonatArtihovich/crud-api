@@ -39,18 +39,24 @@ const server = node_http_1.default.createServer((request, response) => __awaiter
             }
             catch (err) {
                 response.writeHead(404, { 'Content-Type': 'application/json' });
-                response.end(JSON.stringify({ message: err }));
+                response.end(JSON.stringify({ message: 'User not found' }));
             }
         }
     }
     if (request.url === '/api/users') {
-        console.log(request.method);
         try {
             const data = yield getRequestData(request);
+            if (JSON.parse(data)['username'] === undefined
+                || JSON.parse(data)['age'] === undefined
+                || JSON.parse(data)['hobbies'] === undefined
+                || JSON.parse(data)['id'] !== undefined) {
+                response.writeHead(400, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify({ message: 'Invalid user object' }));
+            }
             console.log(data);
             const user = yield controller.addUser(data);
             console.log(user);
-            response.writeHead(200, { 'Content-Type': 'application/json' });
+            response.writeHead(201, { 'Content-Type': 'application/json' });
             response.end(JSON.stringify(user));
         }
         catch (err) {
@@ -68,7 +74,6 @@ function getRequestData(req) {
             let reqBody = '';
             req.on('data', data => {
                 reqBody += data;
-                // resolve(reqBody)
             });
             req.on('end', () => resolve(reqBody));
         });
