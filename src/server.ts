@@ -2,7 +2,7 @@ import http from 'node:http'
 import 'dotenv/config'
 import { Controller } from './controller'
 import { IController, IUser } from './Types'
-// import { workerData } from 'node:worker_threads'
+
 const PORT = process.env.PORT
 const server = http.createServer(async (request, response) => {
     const controller: IController = new Controller
