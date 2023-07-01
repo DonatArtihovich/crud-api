@@ -1,5 +1,5 @@
 import { Users } from './data'
-import { Data, IUser, IController, UserKey } from './Types'
+import { Data, IUser, IController } from './Types'
 import { v4 as v4uuid } from 'uuid'
 
 export class Controller implements IController {
