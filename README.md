@@ -1,6 +1,6 @@
 # crud-api
 
-for installing API dependencies write **npm i** into console.
+for installing API dependencies write `npm i` into console.
 
 ## You can run the application in 3 modes: 
 `production`: write `npm run start:prod` into console.  
