@@ -29,7 +29,7 @@ const server = http.createServer(async (request, response) => {
         }
     }
 
-    if (request.url === '/api/users') {
+    if (request.url === '/api/users' && request.method === 'POST') {
         try {
             const data: string = await getRequestData(request) as string
             if (JSON.parse(data)['username'] === undefined
@@ -39,9 +39,7 @@ const server = http.createServer(async (request, response) => {
                 response.writeHead(400, { 'Content-Type': 'application/json' })
                 response.end(JSON.stringify({ message: 'Invalid user object' }))
             }
-            console.log(data)
             const user = await controller.addUser(data)
-            console.log(user)
             response.writeHead(201, { 'Content-Type': 'application/json' })
             response.end(JSON.stringify(user))
         } catch (err) {
@@ -49,9 +47,28 @@ const server = http.createServer(async (request, response) => {
             response.end(JSON.stringify({ message: err }))
         }
     }
-
+    if (request.url?.match(/^\/api\/users\/[^/]+$/) && request.method === 'PUT') {
+        const id = request.url.split('/')[3]
+        const UUIDPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[8-9a-b][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (!UUIDPattern.test(id)) {
+            response.writeHead(400, { 'Content-Type': 'application/json' })
+            response.end(JSON.stringify({ message: 'User id is invalid' }))
+        } else {
+            try {
+                const data: string = await getRequestData(request) as string
+                const user = await controller.updateUser(id, data);
+                console.log(user)
+                response.writeHead(200, { 'Content-Type': 'application/json' })
+                response.end(JSON.stringify(user))
+            } catch (err) {
+                console.log(err)
+                response.writeHead(404, { 'Content-Type': 'application/json' })
+                response.end(JSON.stringify({ message: 'User not found' }))
+            }
+        }
+    }
 })
-
+//144ea26f-a8be-4d8c-a9f6-d8a8493f5dc0
 server.listen(PORT, () => {
     console.log(`Server is started on port ${PORT}`)
 })

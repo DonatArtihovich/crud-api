@@ -17,7 +17,7 @@ require("dotenv/config");
 const controller_1 = require("./controller");
 const PORT = process.env.PORT;
 const server = node_http_1.default.createServer((request, response) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+    var _a, _b;
     const controller = new controller_1.Controller;
     if (request.url === '/api/users' && request.method === 'GET') {
         const users = yield controller.getUsers();
@@ -43,7 +43,7 @@ const server = node_http_1.default.createServer((request, response) => __awaiter
             }
         }
     }
-    if (request.url === '/api/users') {
+    if (request.url === '/api/users' && request.method === 'POST') {
         try {
             const data = yield getRequestData(request);
             if (JSON.parse(data)['username'] === undefined
@@ -53,9 +53,7 @@ const server = node_http_1.default.createServer((request, response) => __awaiter
                 response.writeHead(400, { 'Content-Type': 'application/json' });
                 response.end(JSON.stringify({ message: 'Invalid user object' }));
             }
-            console.log(data);
             const user = yield controller.addUser(data);
-            console.log(user);
             response.writeHead(201, { 'Content-Type': 'application/json' });
             response.end(JSON.stringify(user));
         }
@@ -64,7 +62,30 @@ const server = node_http_1.default.createServer((request, response) => __awaiter
             response.end(JSON.stringify({ message: err }));
         }
     }
+    if (((_b = request.url) === null || _b === void 0 ? void 0 : _b.match(/^\/api\/users\/[^/]+$/)) && request.method === 'PUT') {
+        const id = request.url.split('/')[3];
+        const UUIDPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[8-9a-b][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        if (!UUIDPattern.test(id)) {
+            response.writeHead(400, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ message: 'User id is invalid' }));
+        }
+        else {
+            try {
+                const data = yield getRequestData(request);
+                const user = yield controller.updateUser(id, data);
+                console.log(user);
+                response.writeHead(200, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify(user));
+            }
+            catch (err) {
+                console.log(err);
+                response.writeHead(404, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify({ message: 'User not found' }));
+            }
+        }
+    }
 }));
+//144ea26f-a8be-4d8c-a9f6-d8a8493f5dc0
 server.listen(PORT, () => {
     console.log(`Server is started on port ${PORT}`);
 });

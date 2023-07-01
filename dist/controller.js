@@ -46,5 +46,29 @@ class Controller {
             });
         });
     }
+    updateUser(id, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => {
+                const userIndex = data_1.Users.findIndex(user => user.id === id);
+                if (userIndex === -1) {
+                    reject();
+                }
+                else {
+                    const requestData = JSON.parse(data);
+                    const user = data_1.Users.find(user => user.id === id);
+                    const updateData = {};
+                    Object.entries(requestData).forEach((cur) => {
+                        const key = cur[0];
+                        const value = cur[1];
+                        updateData[key] = {
+                            value
+                        };
+                    });
+                    Object.defineProperties(user, updateData);
+                    resolve(user);
+                }
+            });
+        });
+    }
 }
 exports.Controller = Controller;

@@ -1,5 +1,5 @@
 import { Users } from './data'
-import { Data, IUser, IController } from './Types'
+import { Data, IUser, IController, UserKey } from './Types'
 import { v4 as v4uuid } from 'uuid'
 
 export class Controller implements IController {
@@ -27,6 +27,28 @@ export class Controller implements IController {
             const userData = { id, ...user }
             Users.push(userData)
             resolve(userData)
+        })
+    }
+
+    async updateUser(id: string, data: string): Promise<IUser> {
+        return new Promise((resolve, reject) => {
+            const userIndex: number = Users.findIndex(user => user.id === id)
+            if (userIndex === -1) {
+                reject()
+            } else {
+                const requestData: Partial<IUser> = JSON.parse(data)
+                const user: IUser = Users.find(user => user.id === id) as IUser
+                const updateData: PropertyDescriptorMap = {}
+                Object.entries(requestData).forEach((cur) => {
+                    const key = cur[0]
+                    const value = cur[1]
+                    updateData[key] = {
+                        value
+                    }
+                })
+                Object.defineProperties(user, updateData)
+                resolve(user)
+            }
         })
     }
 }
