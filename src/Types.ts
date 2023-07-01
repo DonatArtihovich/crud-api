@@ -1,5 +1,5 @@
 export interface IUser {
-    id: number,
+    id: string,
     username: string,
     age: number,
     hobbies: string[]
@@ -9,5 +9,6 @@ export type Data = IUser[]
 
 export interface IController {
     getUsers: () => Promise<Data>
-    getUser: (index: number) => Promise<IUser>
+    getUser: (id: string) => Promise<IUser>
+    addUser: (data: string) => Promise<IUser>
 }
