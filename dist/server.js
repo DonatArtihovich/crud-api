@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const node_http_1 = __importDefault(require("node:http"));
 require("dotenv/config");
 const controller_1 = require("./controller");
+// import { workerData } from 'node:worker_threads'
 const PORT = process.env.PORT;
 const server = node_http_1.default.createServer((request, response) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c;
@@ -54,10 +55,7 @@ const server = node_http_1.default.createServer((request, response) => __awaiter
     else if (request.url === '/api/users' && request.method === 'POST') {
         try {
             const data = yield getRequestData(request);
-            if (JSON.parse(data)['username'] === undefined
-                || JSON.parse(data)['age'] === undefined
-                || JSON.parse(data)['hobbies'] === undefined
-                || JSON.parse(data)['id'] !== undefined) {
+            if (isValidUser(JSON.parse(data))) {
                 response.writeHead(400, { 'Content-Type': 'application/json' });
                 response.end(JSON.stringify({ message: 'Invalid user object' }));
             }
@@ -151,4 +149,10 @@ function getRequestData(req) {
             req.on('end', () => resolve(reqBody));
         });
     });
+}
+function isValidUser(user) {
+    return (typeof user.username === 'string' &&
+        typeof user.age === 'number' &&
+        Array.isArray(user) &&
+        user.hobbies.every(h => typeof h === 'string'));
 }

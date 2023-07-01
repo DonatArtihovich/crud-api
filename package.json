@@ -1,7 +1,8 @@
 {
   "scripts": {
     "build": "tsc",
-    "start": "node ./dist/server"
+    "start": "node ./dist/server",
+    "start:dev": "nodemon ./dist/server"
   },
   "devDependencies": {
     "@types/node": "^20.3.2",
@@ -14,5 +15,8 @@
     "ts-loader": "^9.4.4",
     "typescript": "^5.1.6",
     "uuid": "^9.0.0"
+  },
+  "dependencies": {
+    "cluster": "^0.7.7"
   }
 }

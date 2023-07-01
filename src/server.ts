@@ -1,8 +1,8 @@
 import http from 'node:http'
 import 'dotenv/config'
 import { Controller } from './controller'
-import { IController } from './Types'
-
+import { IController, IUser } from './Types'
+// import { workerData } from 'node:worker_threads'
 const PORT = process.env.PORT
 const server = http.createServer(async (request, response) => {
     const controller: IController = new Controller
@@ -36,10 +36,7 @@ const server = http.createServer(async (request, response) => {
     } else if (request.url === '/api/users' && request.method === 'POST') {
         try {
             const data: string = await getRequestData(request) as string
-            if (JSON.parse(data)['username'] === undefined
-                || JSON.parse(data)['age'] === undefined
-                || JSON.parse(data)['hobbies'] === undefined
-                || JSON.parse(data)['id'] !== undefined) {
+            if (isValidUser(JSON.parse(data))) {
                 response.writeHead(400, { 'Content-Type': 'application/json' })
                 response.end(JSON.stringify({ message: 'Invalid user object' }))
             }
@@ -123,4 +120,13 @@ async function getRequestData(req: http.IncomingMessage) {
 
         req.on('end', () => resolve(reqBody))
     })
+}
+
+function isValidUser(user: IUser) {
+    return (
+        typeof user.username === 'string' &&
+        typeof user.age === 'number' &&
+        Array.isArray(user) &&
+        user.hobbies.every(h => typeof h === 'string')
+    )
 }
