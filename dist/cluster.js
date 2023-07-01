@@ -1,0 +1,172 @@
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const node_os_1 = __importDefault(require("node:os"));
+const cluster_1 = __importDefault(require("cluster"));
+const node_http_1 = __importDefault(require("node:http"));
+require("dotenv/config");
+const controller_1 = require("./controller");
+const PORT = process.env.PORT;
+if (cluster_1.default.isPrimary) {
+    const CPUSnum = node_os_1.default.cpus().length;
+    for (let i = 0; i < CPUSnum - 1; i++) {
+        const port = +PORT + i;
+        const worker = cluster_1.default.fork();
+        worker.send({ port });
+    }
+}
+else {
+    const server = node_http_1.default.createServer((request, response) => __awaiter(void 0, void 0, void 0, function* () {
+        var _a, _b, _c;
+        const controller = new controller_1.Controller;
+        if (request.url === '/api/users' && request.method === 'GET') {
+            const users = yield controller.getUsers();
+            response.writeHead(200, { "Content-Type": "application/json" });
+            response.end(JSON.stringify(users));
+        }
+        else if (((_a = request.url) === null || _a === void 0 ? void 0 : _a.match(/^\/api\/users\/[^/]+$/)) && request.method === 'GET') {
+            const id = request.url.split('/')[3];
+            const UUIDPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[8-9a-b][0-9a-f]{3}-[0-9a-f]{12}$/i;
+            if (!UUIDPattern.test(id)) {
+                response.writeHead(400, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify({ message: 'User id is invalid' }));
+            }
+            else {
+                try {
+                    const user = yield controller.getUser(id);
+                    response.writeHead(200, { 'Content-Type': 'application/json' });
+                    response.end(JSON.stringify(user));
+                }
+                catch (err) {
+                    if (err instanceof Error) {
+                        if (err.message === 'Not Founded') {
+                            response.writeHead(404, { 'Content-Type': 'application/json' });
+                            response.end(JSON.stringify({ message: 'User not found' }));
+                        }
+                        else {
+                            response.writeHead(500, { 'Content-Type': 'application/json' });
+                            response.end(JSON.stringify({ message: 'Unexpected server error' }));
+                        }
+                    }
+                }
+            }
+        }
+        else if (request.url === '/api/users' && request.method === 'POST') {
+            try {
+                const data = yield getRequestData(request);
+                if (isValidUser(JSON.parse(data))) {
+                    response.writeHead(400, { 'Content-Type': 'application/json' });
+                    response.end(JSON.stringify({ message: 'Invalid user object' }));
+                }
+                const user = yield controller.addUser(data);
+                response.writeHead(201, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify(user));
+            }
+            catch (err) {
+                if (err instanceof Error) {
+                    if (err.message === 'Not Founded') {
+                        response.writeHead(404, { 'Content-Type': 'application/json' });
+                        response.end(JSON.stringify({ message: 'User not found' }));
+                    }
+                    else {
+                        response.writeHead(500, { 'Content-Type': 'application/json' });
+                        response.end(JSON.stringify({ message: 'Unexpected server error' }));
+                    }
+                }
+            }
+        }
+        else if (((_b = request.url) === null || _b === void 0 ? void 0 : _b.match(/^\/api\/users\/[^/]+$/)) && request.method === 'PUT') {
+            const id = request.url.split('/')[3];
+            const UUIDPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[8-9a-b][0-9a-f]{3}-[0-9a-f]{12}$/i;
+            if (!UUIDPattern.test(id)) {
+                response.writeHead(400, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify({ message: 'User id is invalid' }));
+            }
+            else {
+                try {
+                    const data = yield getRequestData(request);
+                    const user = yield controller.updateUser(id, data);
+                    response.writeHead(200, { 'Content-Type': 'application/json' });
+                    response.end(JSON.stringify(user));
+                }
+                catch (err) {
+                    if (err instanceof Error) {
+                        if (err.message === 'Not Founded') {
+                            response.writeHead(404, { 'Content-Type': 'application/json' });
+                            response.end(JSON.stringify({ message: 'User not found' }));
+                        }
+                        else {
+                            response.writeHead(500, { 'Content-Type': 'application/json' });
+                            response.end(JSON.stringify({ message: 'Unexpected server error' }));
+                        }
+                    }
+                }
+            }
+        }
+        else if (((_c = request.url) === null || _c === void 0 ? void 0 : _c.match(/^\/api\/users\/[^/]+$/)) && request.method === 'DELETE') {
+            const id = request.url.split('/')[3];
+            const UUIDPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[8-9a-b][0-9a-f]{3}-[0-9a-f]{12}$/i;
+            if (!UUIDPattern.test(id)) {
+                response.writeHead(400, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify({ message: 'User id is invalid' }));
+            }
+            else {
+                try {
+                    yield controller.deleteUser(id);
+                    response.writeHead(204, { 'Content-Type': 'application/json' });
+                    response.end();
+                }
+                catch (err) {
+                    if (err instanceof Error) {
+                        if (err.message === 'Not Founded') {
+                            response.writeHead(404, { 'Content-Type': 'application/json' });
+                            response.end(JSON.stringify({ message: 'User not found' }));
+                        }
+                        else {
+                            response.writeHead(500, { 'Content-Type': 'application/json' });
+                            response.end(JSON.stringify({ message: 'Unexpected server error' }));
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            response.writeHead(404, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ message: 'Resource not found' }));
+        }
+    }));
+    process.on('message', (params) => {
+        const port = params.port;
+        server.listen(port, () => {
+            console.log(`Server is started on port ${port}`);
+        });
+    });
+}
+function getRequestData(req) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise(resolve => {
+            let reqBody = '';
+            req.on('data', data => {
+                reqBody += data;
+            });
+            req.on('end', () => resolve(reqBody));
+        });
+    });
+}
+function isValidUser(user) {
+    return (typeof user.username === 'string' &&
+        typeof user.age === 'number' &&
+        Array.isArray(user) &&
+        user.hobbies.every(h => typeof h === 'string'));
+}
