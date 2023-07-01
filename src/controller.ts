@@ -23,7 +23,6 @@ export class Controller implements IController {
         return new Promise(resolve => {
             const user = JSON.parse(data)
             const id = v4uuid()
-            console.log(id)
             const userData = { id, ...user }
             Users.push(userData)
             resolve(userData)
