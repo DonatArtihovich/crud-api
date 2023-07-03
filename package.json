@@ -1,0 +1,24 @@
+{
+  "scripts": {
+    "build": "webpack --config ./webpack.config.js --env mode=prod",
+    "start:prod": "npm run build && node ./dist/server",
+    "start:dev": "nodemon ./src/server.ts",
+    "start:multi": "nodemon ./src/cluster.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.3.2",
+    "@types/uuid": "^9.0.2",
+    "@typescript-eslint/eslint-plugin": "^5.60.1",
+    "@typescript-eslint/parser": "^5.60.1",
+    "cluster": "^0.7.7",
+    "dotenv": "^16.3.1",
+    "eslint": "^8.43.0",
+    "eslint-webpack-plugin": "^4.0.1",
+    "nodemon": "^2.0.22",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.1.6",
+    "uuid": "^9.0.0",
+    "webpack": "^5.88.1",
+    "webpack-cli": "^5.1.4"
+  }
+}
